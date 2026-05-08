@@ -465,3 +465,5 @@ All types are exported from `Knit/Types.lua` and re-exported by the main module.
 ---
 
 *Last Updated: May 8, 2026*
+
+--
