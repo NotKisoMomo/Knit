@@ -930,4 +930,4 @@ All types exported from `Knit/Types.lua` and re-exported by the main module.
 
 *Last Updated: May 9, 2026*
 
---
+---
