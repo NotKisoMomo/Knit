@@ -1,9 +1,9 @@
-# Knit - Roblox Input Library
+# Mitt - Roblox Input Library
 
-[![Static Badge](https://img.shields.io/badge/build-v1.0.0-black)](https://github.com/TheRealKr3ative)
+[![Static Badge](https://img.shields.io/badge/build-v1.0.0-black)](https://github.com/NotKisoMomo)
 ![Static Badge](https://img.shields.io/badge/stability-stable-green)
 
-Knit is a full-stack input library for Roblox. It provides a unified action registry, context-aware filtering, combo and shortcut detection, Promise-based async flows, session-based state containers, and raw input access -- all in one client-side module.
+Mitt is a full-stack input library for Roblox. It provides a unified action registry, context-aware filtering, combo and shortcut detection, Promise-based async flows, session-based state containers, and raw input access -- all in one client-side module.
 
 ---
 
@@ -13,14 +13,14 @@ Knit is a full-stack input library for Roblox. It provides a unified action regi
 * [Installation](#installation)
 * [Quick Start](#quick-start)
 * [Core Concepts](#core-concepts)
-  * [How Knit Thinks About Input](#how-knit-thinks-about-input)
+  * [How Mitt Thinks About Input](#how-mitt-thinks-about-input)
   * [Actions and Handles](#actions-and-handles)
   * [Type Inference](#type-inference)
   * [Context Stack](#context-stack)
   * [Signals vs Promises](#signals-vs-promises)
   * [Sessions](#sessions)
 * [API Reference](#api-reference)
-  * [Knit.define](#knitdefine)
+  * [Mitt.define](#mittdefine)
   * [Action Handle](#action-handle)
   * [Signals](#signals)
   * [Promises](#promises)
@@ -44,8 +44,8 @@ Knit is a full-stack input library for Roblox. It provides a unified action regi
 
 ## Features
 
-* **Unified Action Registry:** Define once with `Knit.define`, get a handle back. Reference actions by variable -- no string lookups, no global tables.
-* **Auto-inferred Action Types:** Knit reads your `bindings` and decides `button` vs `axis` automatically. No `type` field needed unless you want to override.
+* **Unified Action Registry:** Define once with `Mitt.define`, get a handle back. Reference actions by variable -- no string lookups, no global tables.
+* **Auto-inferred Action Types:** Mitt reads your `bindings` and decides `button` vs `axis` automatically. No `type` field needed unless you want to override.
 * **Context Stack:** A named layer system. Push `"menu"` and gameplay actions go silent without touching a single listener. Pop it and everything resumes.
 * **Combo Detection:** Sequential input sequences with a configurable timing window. Bindings are inferred from the sequence automatically.
 * **Shortcut Detection:** Simultaneous held inputs that fire a single `triggered` signal.
@@ -53,21 +53,21 @@ Knit is a full-stack input library for Roblox. It provides a unified action regi
 * **Hold Detection:** `holdFor(n)` returns a Promise that resolves after an action has been continuously held for `n` seconds.
 * **Repeat Mode:** Held buttons re-fire `pressed` on a fixed interval. Good for rapid-fire weapons or held-scroll.
 * **Deadzone Filtering:** Axis actions below a magnitude threshold are silently dropped -- eliminates stick drift.
-* **Input Buffering:** `Knit.buffer(action, window)` opens a timed window and resolves if the action fires within it. Purpose-built for queuing inputs during hitstun.
+* **Input Buffering:** `Mitt.buffer(action, window)` opens a timed window and resolves if the action fires within it. Purpose-built for queuing inputs during hitstun.
 * **Sessions:** Named state containers with reactive change signals. Replace scattered `local buffered = false` variables with a single structured session per system.
 * **Raw Input Layer:** Per-key listeners that bypass the action system entirely. No context filter, always fires.
-* **Runtime Rebinding:** Swap bindings on any live action with `:rebind()`. Bulk-rebind all actions at once with `Knit.rebindAll()`.
+* **Runtime Rebinding:** Swap bindings on any live action with `:rebind()`. Bulk-rebind all actions at once with `Mitt.rebindAll()`.
 * **Export / Import:** Serialize all current bindings to a plain table. Useful for saving keybind preferences to a datastore.
-* **Visualizer:** `Knit.visualizer()` opens a live overlay showing every registered action's current state, color-coded by phase.
+* **Visualizer:** `Mitt.visualizer()` opens a live overlay showing every registered action's current state, color-coded by phase.
 
 ---
 
 ## Installation
 
-Place the Knit folder into `ReplicatedStorage`, then require it on the client. Knit is a **client-only** library. Never require it from a server Script.
+Place the Mitt folder into `ReplicatedStorage`, then require it on the client. Mitt is a **client-only** library. Never require it from a server Script.
 
 ```lua
-local Knit = require(game.ReplicatedStorage.Knit)
+local Mitt = require(game.ReplicatedStorage.Mitt)
 ```
 
 ---
@@ -75,27 +75,27 @@ local Knit = require(game.ReplicatedStorage.Knit)
 ## Quick Start
 
 ```lua
-local Knit = require(game.ReplicatedStorage.Knit)
+local Mitt = require(game.ReplicatedStorage.Mitt)
 
-local Jump = Knit.define("Jump", {
+local Jump = Mitt.define("Jump", {
     bindings = { Enum.KeyCode.Space, Enum.KeyCode.ButtonA },
     contexts = { "gameplay" },
 })
 
-local Look = Knit.define("Look", {
+local Look = Mitt.define("Look", {
     bindings = { Enum.UserInputType.MouseMovement },
     contexts = { "gameplay" },
     deadzone = 1.5,
 })
 
-local Dash = Knit.define("Dash", {
+local Dash = Mitt.define("Dash", {
     contexts = { "gameplay" },
     mode     = "combo",
     sequence = { Enum.KeyCode.W, Enum.KeyCode.W },
     window   = 0.3,
 })
 
-local State = Knit.createSession("Movement", {
+local State = Mitt.createSession("Movement", {
     jumping  = false,
     dashing  = false,
     airborne = false,
@@ -123,16 +123,16 @@ Dash.triggered:connect(function()
     end)
 end)
 
-Knit.context.push("gameplay")
+Mitt.context.push("gameplay")
 ```
 
 ---
 
 ## Core Concepts
 
-### How Knit Thinks About Input
+### How Mitt Thinks About Input
 
-Without Knit, input handling in Roblox looks like this:
+Without Mitt, input handling in Roblox looks like this:
 
 ```lua
 local buffered = false
@@ -150,16 +150,16 @@ end)
 
 Once you have 20 actions, different game states, combos, held detection, rebinding, and a handful of transient booleans scattered across the module -- it becomes unmaintainable.
 
-Knit solves both sides of this. Actions replace the `InputBegan` wall. Sessions replace the scattered state variables.
+Mitt solves both sides of this. Actions replace the `InputBegan` wall. Sessions replace the scattered state variables.
 
 ---
 
 ### Actions and Handles
 
-`Knit.define` registers an action and returns a handle. Hold onto it -- it is the only way to interact with that action. There is no retrieval-by-string by design. Define at the top of your module, use the handle everywhere.
+`Mitt.define` registers an action and returns a handle. Hold onto it -- it is the only way to interact with that action. There is no retrieval-by-string by design. Define at the top of your module, use the handle everywhere.
 
 ```lua
-local Jump = Knit.define("Jump", {
+local Jump = Mitt.define("Jump", {
     bindings = { Enum.KeyCode.Space },
     contexts = { "gameplay" },
 })
@@ -168,7 +168,6 @@ Jump.pressed:connect(function(event)
     character:Jump()
 end)
 
--- export for other modules to subscribe
 return { Jump = Jump }
 ```
 
@@ -176,7 +175,7 @@ return { Jump = Jump }
 
 ### Type Inference
 
-Knit reads your `bindings` and classifies the action as `button` or `axis`:
+Mitt reads your `bindings` and classifies the action as `button` or `axis`:
 
 | Binding | Inferred type |
 |---------|--------------|
@@ -195,15 +194,15 @@ For `button` actions the useful signals are `pressed`, `released`, and `held`. F
 The context stack is a LIFO list of named strings. An action only fires if its declared `contexts` contains something present anywhere in the stack. Actions with no `contexts` always fire.
 
 ```lua
-Knit.context.push("gameplay")
+Mitt.context.push("gameplay")
 -- Jump (contexts={"gameplay"}) fires
 -- MenuConfirm (contexts={"menu"}) silent
 
-Knit.context.push("menu")
+Mitt.context.push("menu")
 -- Jump still fires -- gameplay is still in the stack
 -- MenuConfirm now fires too
 
-Knit.context.pop()
+Mitt.context.pop()
 -- back to gameplay only, no listeners touched
 ```
 
@@ -233,7 +232,7 @@ Rule of thumb: persistent response -- Signal. One specific moment -- Promise.
 
 ### Sessions
 
-Sessions are named state containers managed by Knit. They replace scattered module-level variables like `local buffered = false` or `local combo = 0` with a single structured object per system. Every key change fires a signal -- you can react to state instead of polling it.
+Sessions are named state containers managed by Mitt. They replace scattered module-level variables like `local buffered = false` or `local combo = 0` with a single structured object per system. Every key change fires a signal -- you can react to state instead of polling it.
 
 ```lua
 -- instead of this
@@ -242,23 +241,23 @@ local blocking  = false
 local comboStep = 0
 
 -- do this
-local CombatState = Knit.createSession("Combat", {
+local CombatState = Mitt.createSession("Combat", {
     charging  = false,
     blocking  = false,
     comboStep = 0,
 })
 ```
 
-Sessions are globally accessible by name via `Knit.getSession`, so other modules can read or react to state without needing direct references passed around.
+Sessions are globally accessible by name via `Mitt.getSession`, so other modules can read or react to state without needing direct references passed around.
 
 ---
 
 ## API Reference
 
-### Knit.define
+### Mitt.define
 
 ```lua
-Knit.define(name: string, config: ActionConfig) -> ActionHandle
+Mitt.define(name: string, config: ActionConfig) -> ActionHandle
 ```
 
 Registers an action and returns its handle. Errors if `name` is already registered.
@@ -277,7 +276,7 @@ Registers an action and returns its handle. Errors if `name` is already register
 
 ### Action Handle
 
-The object returned by `Knit.define`.
+The object returned by `Mitt.define`.
 
 ---
 
@@ -296,7 +295,7 @@ local disconnect = Jump.pressed:connect(function(event)
     character:Jump()
 end)
 
-disconnect() -- stop listening
+disconnect()
 
 Jump.pressed:once():andThen(function(event)
     print("jumped")
@@ -332,7 +331,7 @@ Jump:next():andThen(function(event)
     print("jumped")
 end)
 
-Jump:log()   -- attach debug printers to all signals
+Jump:log()
 ```
 
 ---
@@ -362,36 +361,35 @@ promise
 
 ### Sessions API
 
-#### Knit.createSession
+#### Mitt.createSession
 
 ```lua
-Knit.createSession(name: string, defaults: { [string]: any }) -> SessionHandle
+Mitt.createSession(name: string, defaults: { [string]: any }) -> SessionHandle
 ```
 
 Creates a named session with default values. If the session already exists, returns the existing one.
 
 ```lua
-local CombatState = Knit.createSession("Combat", {
-    charging  = false,
-    blocking  = false,
-    comboStep = 0,
+local CombatState = Mitt.createSession("Combat", {
+    charging   = false,
+    blocking   = false,
+    comboStep  = 0,
     lastAttack = "",
 })
 ```
 
 ---
 
-#### Knit.getSession
+#### Mitt.getSession
 
 ```lua
-Knit.getSession(name: string) -> SessionHandle?
+Mitt.getSession(name: string) -> SessionHandle?
 ```
 
 Retrieves an existing session by name. Returns nil if not found. Use this to access session state from a different module without passing references.
 
 ```lua
--- in another module
-local CombatState = Knit.getSession("Combat")
+local CombatState = Mitt.getSession("Combat")
 if CombatState then
     print(CombatState:get("blocking"))
 end
@@ -399,24 +397,24 @@ end
 
 ---
 
-#### Knit.modifySession
+#### Mitt.modifySession
 
 ```lua
-Knit.modifySession(name: string, data: { [string]: any })
+Mitt.modifySession(name: string, data: { [string]: any })
 ```
 
 Patches a session by name without needing the handle. Errors if the session doesn't exist.
 
 ```lua
-Knit.modifySession("Combat", { blocking = true, comboStep = 0 })
+Mitt.modifySession("Combat", { blocking = true, comboStep = 0 })
 ```
 
 ---
 
-#### Knit.removeSession
+#### Mitt.removeSession
 
 ```lua
-Knit.removeSession(name: string)
+Mitt.removeSession(name: string)
 ```
 
 Destroys a session and removes it from the registry.
@@ -426,42 +424,31 @@ Destroys a session and removes it from the registry.
 #### SessionHandle methods
 
 ```lua
--- read a value
 CombatState:get("charging")           -- any
 
--- set a single key -- fires onChange if value changed
 CombatState:set("charging", true)
 
--- set multiple keys at once
 CombatState:patch({ charging = true, comboStep = 2 })
 
--- flip a boolean, returns the new value
 CombatState:toggle("blocking")        -- boolean
 
--- add n to a number (default 1), returns new value
 CombatState:increment("comboStep")    -- number
 CombatState:increment("comboStep", 2)
 
--- subtract n from a number (default 1), returns new value
 CombatState:decrement("comboStep")    -- number
 
--- restore all keys to their default values
 CombatState:reset()
 
--- react to a specific key changing -- (newValue, previousValue)
 local disconnect = CombatState:onChange("charging", function(new, prev)
     print("charging changed:", prev, "->", new)
 end)
 
--- react to any key changing -- (key, newValue, previousValue)
 local disconnect = CombatState:onAnyChange(function(key, new, prev)
     print(key, "changed:", prev, "->", new)
 end)
 
--- get a plain copy of the entire current state
 CombatState:snapshot()                -- { [string]: any }
 
--- full teardown
 CombatState:destroy()
 ```
 
@@ -470,14 +457,14 @@ CombatState:destroy()
 ### Context
 
 ```lua
-Knit.context.push("gameplay")
-Knit.context.pop()
-Knit.context.peek()              -- string?
-Knit.context.has("gameplay")    -- boolean -- anywhere in stack
-Knit.context.stack()             -- { string } -- full copy
-Knit.context.clear()
+Mitt.context.push("gameplay")
+Mitt.context.pop()
+Mitt.context.peek()              -- string?
+Mitt.context.has("gameplay")    -- boolean -- anywhere in stack
+Mitt.context.stack()             -- { string } -- full copy
+Mitt.context.clear()
 
-Knit.context.changed:connect(function(stack)
+Mitt.context.changed:connect(function(stack)
     print("top:", stack[#stack])
 end)
 ```
@@ -489,11 +476,11 @@ end)
 Bypasses the action system. No context filter, no handle, fires on every matching input.
 
 ```lua
-local disconnect = Knit.input.on(Enum.KeyCode.BackQuote, function(event)
+local disconnect = Mitt.input.on(Enum.KeyCode.BackQuote, function(event)
     DebugPanel:Toggle()
 end)
 
-Knit.input.held(Enum.KeyCode.LeftShift)  -- boolean
+Mitt.input.held(Enum.KeyCode.LeftShift)  -- boolean
 
 disconnect()
 ```
@@ -502,52 +489,52 @@ disconnect()
 
 ### Helpers
 
-#### Knit.race
+#### Mitt.race
 ```lua
-Knit.race(signals: { Signal }) -> Promise
+Mitt.race(signals: { Signal }) -> Promise
 ```
 Resolves with the first signal that fires. Cancels all others immediately.
 
-#### Knit.sequence
+#### Mitt.sequence
 ```lua
-Knit.sequence(promises: { Promise }) -> Promise<{ any }>
+Mitt.sequence(promises: { Promise }) -> Promise<{ any }>
 ```
 Awaits each Promise left to right. Resolves with all values. Cancels all and rejects if any fails.
 
-#### Knit.timeout
+#### Mitt.timeout
 ```lua
-Knit.timeout(promise: Promise, seconds: number) -> Promise
+Mitt.timeout(promise: Promise, seconds: number) -> Promise
 ```
 Wraps any Promise with a deadline. Rejects with `"timeout"` if it doesn't resolve in time.
 
-#### Knit.buffer
+#### Mitt.buffer
 ```lua
-Knit.buffer(action: ActionHandle, window: number) -> Promise
+Mitt.buffer(action: ActionHandle, window: number) -> Promise
 ```
 Opens a timed window on `action.pressed`. Resolves if pressed within the window -- purpose-built for hitstun buffering.
 
-#### Knit.waitFor
+#### Mitt.waitFor
 ```lua
-Knit.waitFor(action: ActionHandle, phase: Phase?) -> Promise
+Mitt.waitFor(action: ActionHandle, phase: Phase?) -> Promise
 ```
 One-shot wait on any action signal by phase. Defaults to `"pressed"`.
 
-#### Knit.rebindAll
+#### Mitt.rebindAll
 ```lua
-Knit.rebindAll(map: { [string]: { InputBinding } })
+Mitt.rebindAll(map: { [string]: { InputBinding } })
 ```
 Bulk-rebinds multiple actions from a name-keyed table.
 
-#### Knit.export / Knit.import
+#### Mitt.export / Mitt.import
 ```lua
-Knit.export() -> { [string]: { string } }
-Knit.import(map: { [string]: { InputBinding } })
+Mitt.export() -> { [string]: { string } }
+Mitt.import(map: { [string]: { InputBinding } })
 ```
 Serialize and restore all bindings. Safe to save to a datastore.
 
-#### Knit.visualizer
+#### Mitt.visualizer
 ```lua
-Knit.visualizer() -> ScreenGui
+Mitt.visualizer() -> ScreenGui
 ```
 Live input overlay. Purple = pressed, green = triggered, yellow = axis delta, gray = idle. Remove before shipping.
 
@@ -556,10 +543,10 @@ Live input overlay. Purple = pressed, green = triggered, yellow = axis delta, gr
 ### Registry
 
 ```lua
-Knit.get("Jump")      -- ActionHandle? -- prefer passing the handle directly
-Knit.action("Jump")   -- alias for Knit.get
-Knit.remove("Jump")   -- destroy and unregister an action
-Knit.clear()          -- destroy all actions and listeners
+Mitt.get("Jump")      -- ActionHandle? -- prefer passing the handle directly
+Mitt.action("Jump")   -- alias for Mitt.get
+Mitt.remove("Jump")   -- destroy and unregister an action
+Mitt.clear()          -- destroy all actions and listeners
 ```
 
 ---
@@ -571,7 +558,7 @@ Knit.clear()          -- destroy all actions and listeners
 Tap for light, hold for heavy. Session tracks the charge state cleanly.
 
 ```lua
-local CombatState = Knit.createSession("Combat", {
+local CombatState = Mitt.createSession("Combat", {
     charging = false,
 })
 
@@ -605,12 +592,12 @@ end)
 Session tracks the buffered state. No module-level variables needed.
 
 ```lua
-local CombatState = Knit.createSession("Combat", {
+local CombatState = Mitt.createSession("Combat", {
     buffered = false,
 })
 
 Combat.hitstunStarted:Connect(function()
-    Knit.buffer(Attack, 0.25):andThen(function()
+    Mitt.buffer(Attack, 0.25):andThen(function()
         CombatState:set("buffered", true)
     end)
 end)
@@ -628,14 +615,13 @@ end)
 
 ```lua
 local function openMenu()
-    Knit.context.push("menu")
+    Mitt.context.push("menu")
 end
 
 local function closeMenu()
-    Knit.context.pop()
+    Mitt.context.pop()
 end
 
--- nested menus handled naturally
 openMenu()          -- stack: ["gameplay", "menu"]
 openInventory()     -- stack: ["gameplay", "menu", "inventory"]
 closeInventory()    -- stack: ["gameplay", "menu"]
@@ -649,28 +635,24 @@ closeMenu()         -- stack: ["gameplay"]
 All combat flags in one place. React to changes anywhere in the codebase.
 
 ```lua
-local CombatState = Knit.createSession("Combat", {
+local CombatState = Mitt.createSession("Combat", {
     blocking  = false,
     charging  = false,
     comboStep = 0,
     stunned   = false,
 })
 
--- react to blocking changing anywhere
 CombatState:onChange("blocking", function(blocking)
     character.Humanoid.WalkSpeed = blocking and 8 or 16
 end)
 
--- react to any state change for logging
 CombatState:onAnyChange(function(key, new, prev)
     print(string.format("[CombatState] %s: %s -> %s", key, tostring(prev), tostring(new)))
 end)
 
--- set from input
 Block.pressed:connect(function()  CombatState:set("blocking", true)  end)
 Block.released:connect(function() CombatState:set("blocking", false) end)
 
--- increment combo counter
 LightAttack.pressed:connect(function()
     CombatState:increment("comboStep")
     if CombatState:get("comboStep") >= 3 then
@@ -679,13 +661,11 @@ LightAttack.pressed:connect(function()
     end
 end)
 
--- reset on hit
 Combat.stunned:Connect(function()
     CombatState:patch({ stunned = true, comboStep = 0, charging = false })
 end)
 
--- read from another module
-local state = Knit.getSession("Combat"):snapshot()
+local state = Mitt.getSession("Combat"):snapshot()
 print(state.blocking, state.comboStep)
 ```
 
@@ -695,11 +675,11 @@ print(state.blocking, state.comboStep)
 
 ```lua
 local function openSettings()
-    SettingsUI:Populate(Knit.export())
+    SettingsUI:Populate(Mitt.export())
 end
 
 local function applySettings(newBindings)
-    Knit.import(newBindings)
+    Mitt.import(newBindings)
     DataStore:SetAsync(userId, newBindings)
 end
 ```
@@ -711,16 +691,16 @@ end
 ```lua
 local function runTutorial()
     UI:ShowPrompt("Press Space to jump")
-    Knit.context.push("tutorial")
+    Mitt.context.push("tutorial")
 
-    local TutJump = Knit.define("TutJump", {
+    local TutJump = Mitt.define("TutJump", {
         bindings = { Enum.KeyCode.Space },
         contexts = { "tutorial" },
     })
 
     TutJump.pressed:once():andThen(function()
-        Knit.context.pop()
-        Knit.remove("TutJump")
+        Mitt.context.pop()
+        Mitt.remove("TutJump")
         UI:HidePrompt()
     end)
 end
@@ -731,42 +711,42 @@ end
 ## Combat Example
 
 ```lua
-local Knit = require(game.ReplicatedStorage.Knit)
+local Mitt = require(game.ReplicatedStorage.Mitt)
 
-local LightAttack = Knit.define("LightAttack", {
+local LightAttack = Mitt.define("LightAttack", {
     bindings = { Enum.UserInputType.MouseButton1, Enum.KeyCode.ButtonR1 },
     contexts = { "gameplay" },
 })
 
-local HeavyAttack = Knit.define("HeavyAttack", {
+local HeavyAttack = Mitt.define("HeavyAttack", {
     bindings = { Enum.UserInputType.MouseButton2, Enum.KeyCode.ButtonR2 },
     contexts = { "gameplay" },
 })
 
-local Block = Knit.define("Block", {
+local Block = Mitt.define("Block", {
     bindings = { Enum.KeyCode.F, Enum.KeyCode.ButtonL1 },
     contexts = { "gameplay" },
 })
 
-local Dodge = Knit.define("Dodge", {
+local Dodge = Mitt.define("Dodge", {
     contexts = { "gameplay" },
     mode     = "combo",
     sequence = { Enum.KeyCode.Q, Enum.KeyCode.Q },
     window   = 0.25,
 })
 
-local Parry = Knit.define("Parry", {
+local Parry = Mitt.define("Parry", {
     bindings = { Enum.KeyCode.F, Enum.KeyCode.LeftShift },
     contexts = { "gameplay" },
     mode     = "shortcut",
 })
 
-local MenuConfirm = Knit.define("MenuConfirm", {
+local MenuConfirm = Mitt.define("MenuConfirm", {
     bindings = { Enum.KeyCode.Return, Enum.KeyCode.ButtonA },
     contexts = { "menu" },
 })
 
-local CombatState = Knit.createSession("Combat", {
+local CombatState = Mitt.createSession("Combat", {
     blocking  = false,
     charging  = false,
     comboStep = 0,
@@ -806,8 +786,8 @@ Block.released:connect(function() CombatState:set("blocking", false) end)
 
 Parry.triggered:connect(function(event)
     event:consume()
-    Knit.timeout(
-        Knit.race({ LightAttack.pressed, HeavyAttack.pressed }),
+    Mitt.timeout(
+        Mitt.race({ LightAttack.pressed, HeavyAttack.pressed }),
         0.2
     ):andThen(function()
         Combat:Parry()
@@ -819,7 +799,7 @@ Dodge.triggered:connect(function()
 end)
 
 Combat.hitstunStarted:Connect(function()
-    Knit.buffer(LightAttack, 0.3):andThen(function()
+    Mitt.buffer(LightAttack, 0.3):andThen(function()
         CombatState:set("buffered", true)
     end)
 end)
@@ -836,7 +816,7 @@ MenuConfirm.pressed:connect(function(event)
     Menu:Confirm()
 end)
 
-Knit.context.push("gameplay")
+Mitt.context.push("gameplay")
 ```
 
 ---
@@ -913,7 +893,7 @@ export type SessionHandle = {
 }
 ```
 
-All types exported from `Knit/Types.lua` and re-exported by the main module.
+All types exported from `Mitt/Types.lua` and re-exported by the main module.
 
 ---
 
@@ -928,6 +908,8 @@ All types exported from `Knit/Types.lua` and re-exported by the main module.
 
 ---
 
-*Last Updated: May 9, 2026*
+*Built by Plinko Labs*
+
+*Last Updated: May 23, 2026*
 
 ---
