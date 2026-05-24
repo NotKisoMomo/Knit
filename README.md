@@ -4,12 +4,12 @@
 
 **Full-stack input library for Roblox**
 
-[![Version](https://img.shields.io/badge/version-2.0.0-6C3EF4?style=flat-square&logoColor=white)](https://github.com/NotKisoMomo/Mitt)
-[![Stability](https://img.shields.io/badge/stability-stable-22c55e?style=flat-square)](https://github.com/NotKisoMomo/Mitt)
-[![License](https://img.shields.io/badge/license-MIT-6C3EF4?style=flat-square)](https://github.com/NotKisoMomo/Mitt/blob/main/LICENSE)
-[![Luau](https://img.shields.io/badge/luau-typed-6C3EF4?style=flat-square)](https://luau-lang.org)
-[![Roblox](https://img.shields.io/badge/roblox-client--only-e11d48?style=flat-square)](https://create.roblox.com)
-[![Built by Plinko Labs](https://img.shields.io/badge/built%20by-Plinko%20Labs-6C3EF4?style=flat-square)](https://github.com/NotKisoMomo)
+[![Version](https://img.shields.io/badge/version-2.0.0-6C3EF4?style=for-the-badge&logoColor=white)](https://github.com/NotKisoMomo/Mitt)
+[![Stability](https://img.shields.io/badge/stability-stable-22c55e?style=for-the-badge)](https://github.com/NotKisoMomo/Mitt)
+[![License](https://img.shields.io/badge/license-MIT-6C3EF4?style=for-the-badge)](https://github.com/NotKisoMomo/Mitt/blob/main/LICENSE)
+[![Luau](https://img.shields.io/badge/luau-typed-6C3EF4?style=for-the-badge)](https://luau-lang.org)
+[![Roblox](https://img.shields.io/badge/roblox-client--only-e11d48?style=for-the-badge)](https://create.roblox.com)
+[![Built by Plinko Labs](https://img.shields.io/badge/built%20by-Plinko%20Labs-6C3EF4?style=for-the-badge)](https://github.com/NotKisoMomo)
 
 </div>
 
